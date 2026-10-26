@@ -43,7 +43,7 @@ CURRENT_PROJECT_VERSION = 1; ENABLE_APP_SANDBOX = YES; ENABLE_HARDENED_RUNTIME =
 GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_LSUIElement = YES;
 INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
-MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.clipboardcleaner.ClipboardCleaner;
+MARKETING_VERSION = 1.0.0; PRODUCT_BUNDLE_IDENTIFIER = com.clipboardcleaner.ClipboardCleaner;
 PRODUCT_NAME = "$(TARGET_NAME)";}; name = Debug; };
   A00000000000000000000014 = {isa = XCBuildConfiguration; buildSettings = {CODE_SIGN_ENTITLEMENTS = ClipboardCleaner/ClipboardCleaner.entitlements;
 ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; COMBINE_HIDPI_IMAGES = YES;
@@ -51,7 +51,7 @@ CURRENT_PROJECT_VERSION = 1; ENABLE_APP_SANDBOX = YES; ENABLE_HARDENED_RUNTIME =
 GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_LSUIElement = YES;
 INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/../Frameworks");
-MARKETING_VERSION = 1.0; PRODUCT_BUNDLE_IDENTIFIER = com.clipboardcleaner.ClipboardCleaner;
+MARKETING_VERSION = 1.0.0; PRODUCT_BUNDLE_IDENTIFIER = com.clipboardcleaner.ClipboardCleaner;
 PRODUCT_NAME = "$(TARGET_NAME)";}; name = Release; };
  };
  rootObject = A0000000000000000000000E;

@@ -1,3 +1,51 @@
+# macOS and editor files
+.DS_Store
+._*
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Xcode build products, caches and local user settings
 build/
 DerivedData/
 xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+.build/
+.swiftpm/
+*.xcarchive/
+*.xcresult/
+*.app/
+*.dSYM/
+*.dSYM.zip
+*.ipa
+*.dmg
+*.pkg
+*.zip
+*.log
+*.tmp
+
+# Credentials, signing material and local configuration
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.p8
+*.cer
+*.crt
+*.key
+*.pem
+*.mobileprovision
+*.provisionprofile
+.aws/
+.ssh/
+.netrc
+.codex/
+.agents/
+
+# Local release verification and approval preview
+.release-local/
