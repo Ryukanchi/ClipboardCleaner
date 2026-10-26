@@ -12,7 +12,7 @@
 - **One-click clearing.** Open the menu bar icon and choose **Delete Clipboard**.
 - **A minimal interface.** Two buttons, no main window, no Dock icon.
 - **Local by design.** No clipboard reading, monitoring, history, analytics, or network requests.
-- **Only when you ask.** No automatic clearing and no automatic launch at login.
+- **Only when you ask.** No automatic clearing. Launch at login is optional and configured manually in macOS.
 
 ## Screenshot
 
@@ -53,7 +53,17 @@ Copy `build/Build/Products/Release/ClipboardCleaner.app` to **Applications** and
 
 Click the clipboard symbol in the menu bar, then **Delete Clipboard**. Choose **Close App** to quit.
 
-To launch at login, add the app manually in **System Settings → General → Login Items → Open at Login**. The app never enables this itself.
+### Launch at login (optional)
+
+Clipboard Cleaner does not register itself as a login item. To enable automatic launch after you sign in:
+
+1. Keep the app in **Applications**.
+2. Open **System Settings → General → Login Items** (called **Login Items & Extensions** on newer macOS versions).
+3. Under **Open at Login**, click **+** and select `ClipboardCleaner.app` from **Applications**.
+
+To disable automatic launch, select the app in that list and click **−**. **Close App** quits the current session without removing the login item. Launching the app never clears the clipboard; clearing requires a click on **Delete Clipboard**.
+
+See Apple's [login item instructions](https://support.apple.com/guide/mac-help/open-items-automatically-when-you-log-in-mh15189/mac).
 
 ## System requirements
 
@@ -65,4 +75,6 @@ To launch at login, add the app manually in **System Settings → General → Lo
 
 ## License
 
-A license has not been selected yet. No open-source license is granted at this stage.
+Licensed under the [MIT License](LICENSE).
+
+Copyright (c) 2026 Ryukanchi.
