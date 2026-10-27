@@ -17,7 +17,7 @@
 
 ## Download & Installation
 
-1. [Download the macOS ZIP](https://github.com/Ryukanchi/ClipboardCleaner/releases/download/v1.0.0/ClipboardCleaner-v1.0.0-macOS-unnotarized.zip) and unzip it.
+1. [Download the macOS ZIP](https://github.com/Ryukanchi/ClipboardCleaner/releases/download/v1.0.1/ClipboardCleaner-v1.0.1-macOS-unnotarized.zip) and unzip it.
 2. Move **ClipboardCleaner.app** to **Applications**, then open it.
 
 **This build is ad hoc signed, without Apple Developer ID signing or notarization. macOS may block it.** If you trust the source and choose to proceed, follow [Apple's official instructions](https://support.apple.com/en-us/102445) for an app-specific exception in **System Settings → Privacy & Security → Open Anyway**. Keep system security protections enabled.
