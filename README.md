@@ -43,6 +43,14 @@ xcodebuild -project ClipboardCleaner.xcodeproj \
 
 The universal, ad hoc signed app is at `build/release/Build/Products/Release/ClipboardCleaner.app`. See the [release procedure](docs/RELEASING.md) for packaging and verification.
 
+## Continuous integration
+
+[![macOS build](https://github.com/Ryukanchi/ClipboardCleaner/actions/workflows/macos-build.yml/badge.svg?branch=main)](https://github.com/Ryukanchi/ClipboardCleaner/actions/workflows/macos-build.yml)
+
+GitHub Actions builds the universal Release app on `macos-15` with Xcode 26.3 for pushes and pull requests to `main`. It checks the expected version/build, macOS deployment target, both binary architectures and their minimum OS, strict ad hoc signature, Hardened Runtime, App Sandbox, and `LSUIElement` metadata.
+
+CI does not launch the app or test its UI, buttons, animation, real Intel hardware, or a real macOS 13 system. It does not publish releases or upload build artifacts.
+
 ## Privacy
 
 Only the active system clipboard is cleared, and only when you click **Delete Clipboard**. Launching the app does not clear it. Copies in clipboard managers, other apps, or other devices may remain; this is not a secure-erasure guarantee. The app does not monitor, read, store, or transmit clipboard contents.

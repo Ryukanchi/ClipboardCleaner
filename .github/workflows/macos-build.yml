@@ -1,0 +1,135 @@
+name: macOS build
+
+"on":
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and verify
+    runs-on: macos-15
+    timeout-minutes: 20
+    env:
+      # Installed on the standard macos-15 ARM64 image; avoid floating defaults.
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Show build environment
+        run: |
+          set -euo pipefail
+          echo "DEVELOPER_DIR=$DEVELOPER_DIR"
+          test -d "$DEVELOPER_DIR" || { echo "::error::Selected Xcode is not installed"; exit 1; }
+          sw_vers
+          xcodebuild -version
+          xcodebuild -showsdks
+
+      - name: Build universal Release app
+        env:
+          CC_DERIVED_DATA: ${{ runner.temp }}/ClipboardCleanerDerivedData
+        run: |
+          set -euo pipefail
+          xcodebuild -project ClipboardCleaner.xcodeproj \
+            -scheme ClipboardCleaner -configuration Release \
+            -destination 'generic/platform=macOS' \
+            -derivedDataPath "$CC_DERIVED_DATA" -jobs 1 \
+            CODE_SIGN_IDENTITY="-" build
+
+      - name: Verify app integrity
+        env:
+          CC_DERIVED_DATA: ${{ runner.temp }}/ClipboardCleanerDerivedData
+        run: |
+          set -euo pipefail
+
+          cc_fail() {
+            echo "::error::$*"
+            exit 1
+          }
+          cc_equal() {
+            printf '%s: actual=%s expected=%s\n' "$1" "$2" "$3"
+            [[ "$2" == "$3" ]] || cc_fail "$1 mismatch"
+          }
+
+          CC_APP="$CC_DERIVED_DATA/Build/Products/Release/ClipboardCleaner.app"
+          CC_EXECUTABLE="$CC_APP/Contents/MacOS/ClipboardCleaner"
+          echo "App bundle: $CC_APP"
+          [[ -d "$CC_APP" ]] || cc_fail "App bundle is missing"
+          [[ -f "$CC_EXECUTABLE" ]] || cc_fail "App executable is missing"
+
+          CC_SETTINGS="$(xcodebuild -project ClipboardCleaner.xcodeproj \
+            -scheme ClipboardCleaner -configuration Release \
+            -destination 'generic/platform=macOS' \
+            -derivedDataPath "$CC_DERIVED_DATA" \
+            CODE_SIGN_IDENTITY="-" -showBuildSettings)"
+          cc_setting() {
+            printf '%s\n' "$CC_SETTINGS" | awk -v key="$1" '
+              $1 == key && $2 == "=" { value = $3; found++ }
+              END {
+                if (found != 1) {
+                  print "Expected exactly one build setting: " key > "/dev/stderr"
+                  exit 1
+                }
+                print value
+              }'
+          }
+          CC_VERSION="$(cc_setting MARKETING_VERSION)"
+          CC_BUILD="$(cc_setting CURRENT_PROJECT_VERSION)"
+          CC_MIN_OS="$(cc_setting MACOSX_DEPLOYMENT_TARGET)"
+          cc_equal "MARKETING_VERSION" "$CC_VERSION" "1.0.1"
+          cc_equal "CURRENT_PROJECT_VERSION" "$CC_BUILD" "2"
+          cc_equal "MACOSX_DEPLOYMENT_TARGET" "$CC_MIN_OS" "13.0"
+
+          cc_equal "Info.plist CFBundleShortVersionString" \
+            "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$CC_APP/Contents/Info.plist")" "$CC_VERSION"
+          cc_equal "Info.plist CFBundleVersion" \
+            "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$CC_APP/Contents/Info.plist")" "$CC_BUILD"
+          cc_equal "Info.plist LSMinimumSystemVersion" \
+            "$(/usr/libexec/PlistBuddy -c 'Print :LSMinimumSystemVersion' "$CC_APP/Contents/Info.plist")" "$CC_MIN_OS"
+          cc_equal "Info.plist LSUIElement" \
+            "$(/usr/libexec/PlistBuddy -c 'Print :LSUIElement' "$CC_APP/Contents/Info.plist")" "true"
+
+          CC_ARCHS="$(lipo -archs "$CC_EXECUTABLE")"
+          echo "Architectures: $CC_ARCHS"
+          [[ " $CC_ARCHS " == *" arm64 "* ]] || cc_fail "arm64 slice is missing"
+          [[ " $CC_ARCHS " == *" x86_64 "* ]] || cc_fail "x86_64 slice is missing"
+          for CC_ARCH in arm64 x86_64; do
+            CC_SLICE_MIN_OS="$(xcrun vtool -arch "$CC_ARCH" -show-build "$CC_EXECUTABLE" | awk '$1 == "minos" { print $2 }')"
+            cc_equal "Mach-O $CC_ARCH minOS" "$CC_SLICE_MIN_OS" "$CC_MIN_OS"
+          done
+
+          codesign --verify --deep --strict --verbose=2 "$CC_APP"
+          echo "Strict code signature verification: PASS"
+          CC_SIGNATURE="$(codesign -dv --verbose=4 "$CC_APP" 2>&1)"
+          printf '%s\n' "$CC_SIGNATURE"
+          grep -q '^Signature=adhoc$' <<< "$CC_SIGNATURE" || cc_fail "Signature is not ad hoc"
+          grep -Eq '^CodeDirectory .*flags=[^[:space:]]*runtime' <<< "$CC_SIGNATURE" || cc_fail "Hardened Runtime flag is missing"
+          echo "Ad hoc signature and Hardened Runtime: PASS"
+
+          CC_ENTITLEMENTS="$CC_DERIVED_DATA/entitlements.plist"
+          codesign -d --entitlements - --xml "$CC_APP" > "$CC_ENTITLEMENTS"
+          cat "$CC_ENTITLEMENTS"
+          python3 - "$CC_ENTITLEMENTS" <<'PY'
+          import plistlib
+          import sys
+          with open(sys.argv[1], "rb") as source:
+              value = plistlib.load(source).get("com.apple.security.app-sandbox")
+          print(f"App Sandbox entitlement: actual={value!r} expected=True")
+          if value is not True:
+              sys.exit("ERROR: App Sandbox entitlement is not boolean true")
+          PY
+          echo "All app integrity checks passed."
