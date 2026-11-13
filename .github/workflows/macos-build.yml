@@ -21,7 +21,6 @@ jobs:
     env:
       # Installed on the standard macos-15 ARM64 image; avoid floating defaults.
       DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
-      CC_DERIVED_DATA: ${{ runner.temp }}/ClipboardCleanerDerivedData
     defaults:
       run:
         shell: bash
@@ -41,6 +40,8 @@ jobs:
           xcodebuild -showsdks
 
       - name: Build universal Release app
+        env:
+          CC_DERIVED_DATA: ${{ runner.temp }}/ClipboardCleanerDerivedData
         run: |
           set -euo pipefail
           xcodebuild -project ClipboardCleaner.xcodeproj \
@@ -50,6 +51,8 @@ jobs:
             CODE_SIGN_IDENTITY="-" build
 
       - name: Verify app integrity
+        env:
+          CC_DERIVED_DATA: ${{ runner.temp }}/ClipboardCleanerDerivedData
         run: |
           set -euo pipefail
 
