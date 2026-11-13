@@ -45,6 +45,8 @@ The universal, ad hoc signed app is at `build/release/Build/Products/Release/Cli
 
 ## Continuous integration
 
+[![macOS build](https://github.com/Ryukanchi/ClipboardCleaner/actions/workflows/macos-build.yml/badge.svg?branch=main)](https://github.com/Ryukanchi/ClipboardCleaner/actions/workflows/macos-build.yml)
+
 GitHub Actions builds the universal Release app on `macos-15` with Xcode 26.3 for pushes and pull requests to `main`. It checks the expected version/build, macOS deployment target, both binary architectures and their minimum OS, strict ad hoc signature, Hardened Runtime, App Sandbox, and `LSUIElement` metadata.
 
 CI does not launch the app or test its UI, buttons, animation, real Intel hardware, or a real macOS 13 system. It does not publish releases or upload build artifacts.
